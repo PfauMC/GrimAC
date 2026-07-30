@@ -2,6 +2,7 @@ package ac.grim.grimac.utils.nmsutil;
 
 import ac.grim.grimac.events.packets.PacketWorldBorder;
 import ac.grim.grimac.player.GrimPlayer;
+import ac.grim.grimac.predictionengine.MovementCheckRunner;
 import ac.grim.grimac.predictionengine.blockeffects.BlockEffectsResolver;
 import ac.grim.grimac.predictionengine.blockeffects.impl.BlockEffectsResolverV1_21_10;
 import ac.grim.grimac.predictionengine.blockeffects.impl.BlockEffectsResolverV1_21_2;
@@ -46,6 +47,8 @@ import java.util.List;
 @UtilityClass
 public final class Collisions {
     public static final double COLLISION_EPSILON = 1.0E-7;
+
+    private static final int MAX_COLLISION_RANGE = MovementCheckRunner.MAX_MOVEMENT_PER_TICK * 2 + 2;
 
     private static final boolean IS_FOURTEEN = PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_14); // Optimization for chunks with empty block count
     private static final List<List<Axis>> allAxisCombinations = Arrays.asList(
@@ -267,6 +270,13 @@ public final class Collisions {
         int maxBlockY = (int) Math.floor(expandedBB.maxY + COLLISION_EPSILON) + 1;
         int minBlockZ = (int) Math.floor(expandedBB.minZ - COLLISION_EPSILON) - 1;
         int maxBlockZ = (int) Math.floor(expandedBB.maxZ + COLLISION_EPSILON) + 1;
+
+        final int centerX = (int) Math.floor(player.lastX);
+        final int centerZ = (int) Math.floor(player.lastZ);
+        minBlockX = Math.max(minBlockX, centerX - MAX_COLLISION_RANGE);
+        maxBlockX = Math.min(maxBlockX, centerX + MAX_COLLISION_RANGE);
+        minBlockZ = Math.max(minBlockZ, centerZ - MAX_COLLISION_RANGE);
+        maxBlockZ = Math.min(maxBlockZ, centerZ + MAX_COLLISION_RANGE);
 
         final int minSection = player.compensatedWorld.getMinHeight() >> 4;
         final int minBlock = minSection << 4;
@@ -724,6 +734,13 @@ public final class Collisions {
         int minBlockZ = (int) Math.floor(checkBox.minZ);
         int maxBlockZ = (int) Math.floor(checkBox.maxZ);
 
+        final int centerX = (int) Math.floor(player.lastX);
+        final int centerZ = (int) Math.floor(player.lastZ);
+        minBlockX = Math.max(minBlockX, centerX - MAX_COLLISION_RANGE);
+        maxBlockX = Math.min(maxBlockX, centerX + MAX_COLLISION_RANGE);
+        minBlockZ = Math.max(minBlockZ, centerZ - MAX_COLLISION_RANGE);
+        maxBlockZ = Math.min(maxBlockZ, centerZ + MAX_COLLISION_RANGE);
+
         final int minSection = player.compensatedWorld.getMinHeight() >> 4;
         final int minBlock = minSection << 4;
         final int maxBlock = player.compensatedWorld.getMaxHeight() - 1;
@@ -788,6 +805,13 @@ public final class Collisions {
         int maxBlockY = (int) Math.floor(checkBox.maxY + COLLISION_EPSILON) + 1;
         int minBlockZ = (int) Math.floor(checkBox.minZ - COLLISION_EPSILON) - 1;
         int maxBlockZ = (int) Math.floor(checkBox.maxZ + COLLISION_EPSILON) + 1;
+
+        final int centerX = (int) Math.floor(player.lastX);
+        final int centerZ = (int) Math.floor(player.lastZ);
+        minBlockX = Math.max(minBlockX, centerX - MAX_COLLISION_RANGE);
+        maxBlockX = Math.min(maxBlockX, centerX + MAX_COLLISION_RANGE);
+        minBlockZ = Math.max(minBlockZ, centerZ - MAX_COLLISION_RANGE);
+        maxBlockZ = Math.min(maxBlockZ, centerZ + MAX_COLLISION_RANGE);
 
         final int minSection = player.compensatedWorld.getMinHeight() >> 4;
         final int minBlock = minSection << 4;
