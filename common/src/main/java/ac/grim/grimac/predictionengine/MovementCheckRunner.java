@@ -53,6 +53,8 @@ import com.github.retrooper.packetevents.protocol.world.states.defaulttags.Block
 import com.github.retrooper.packetevents.protocol.world.states.type.StateTypes;
 
 public class MovementCheckRunner extends Check implements PositionCheck {
+    // Magic number to stop people from crashing the server
+    public static final int MAX_MOVEMENT_PER_TICK = 16;
     // Averaged over 500 predictions (Defaults set slightly above my 3600x results)
     public static double predictionNanos = 0.3 * 1e6;
     // Averaged over 20000 predictions
@@ -155,14 +157,13 @@ public class MovementCheckRunner extends Check implements PositionCheck {
         // Without this, players could sneak on a flat plane to avoid velocity
         // That would be bad so this prevents it
         if (!player.isFlying && player.isSneaking && Collisions.isAboveGround(player)) {
-            // 16 - Magic number to stop people from crashing the server
             // 0.05 - Mojang's magic value that they use to calculate precision of sneaking
             // They move the position back by 0.05 blocks repeatedly until they are above ground
             // So by going forwards 0.05 blocks, we can determine if the player was influenced by this
-            double posX = Math.max(0.05, GrimMath.clamp(player.actualMovement.getX(), -16, 16) + 0.05);
-            double posZ = Math.max(0.05, GrimMath.clamp(player.actualMovement.getZ(), -16, 16) + 0.05);
-            double negX = Math.min(-0.05, GrimMath.clamp(player.actualMovement.getX(), -16, 16) - 0.05);
-            double negZ = Math.min(-0.05, GrimMath.clamp(player.actualMovement.getZ(), -16, 16) - 0.05);
+            double posX = Math.max(0.05, GrimMath.clamp(player.actualMovement.getX(), -MAX_MOVEMENT_PER_TICK, MAX_MOVEMENT_PER_TICK) + 0.05);
+            double posZ = Math.max(0.05, GrimMath.clamp(player.actualMovement.getZ(), -MAX_MOVEMENT_PER_TICK, MAX_MOVEMENT_PER_TICK) + 0.05);
+            double negX = Math.min(-0.05, GrimMath.clamp(player.actualMovement.getX(), -MAX_MOVEMENT_PER_TICK, MAX_MOVEMENT_PER_TICK) - 0.05);
+            double negZ = Math.min(-0.05, GrimMath.clamp(player.actualMovement.getZ(), -MAX_MOVEMENT_PER_TICK, MAX_MOVEMENT_PER_TICK) - 0.05);
 
             Vector3dm NE = Collisions.maybeBackOffFromEdge(new Vector3dm(posX, 0, negZ), player, true);
             Vector3dm NW = Collisions.maybeBackOffFromEdge(new Vector3dm(negX, 0, negZ), player, true);
