@@ -154,12 +154,14 @@ public final class GrimACBukkitLoaderPlugin extends JavaPlugin implements Platfo
             Bukkit.getPluginManager().callEvent(new ac.grim.grimac.api.events.GrimReloadEvent(success));
         });
 
-        eventBus.subscribe(plugin, ac.grim.grimac.api.event.events.FlagEvent.class, event -> {
+        // A legacy subscriber makes FlagEvent.Channel dispatch through a per-thread pooled event that
+        // keeps the last GrimPlayer after dispatch, and with it the player's world after an unload.
+        eventBus.get(ac.grim.grimac.api.event.events.FlagEvent.class).onFlagSupplier(plugin, (user, check, verbose, cancelled) -> {
             ac.grim.grimac.api.events.FlagEvent bukkitEvent =
-                    new ac.grim.grimac.api.events.FlagEvent(event.getUser(), event.getCheck(), event::getVerbose);
+                    new ac.grim.grimac.api.events.FlagEvent(user, check, verbose);
             Bukkit.getPluginManager().callEvent(bukkitEvent);
-            event.setCancelled(event.isCancelled() || bukkitEvent.isCancelled());
-        }, 0, false, GrimACBukkitLoaderPlugin.class);
+            return cancelled || bukkitEvent.isCancelled();
+        }, 0, false);
 
         eventBus.get(ac.grim.grimac.api.event.events.CommandExecuteEvent.class).onCommandExecuteSupplier(plugin, (user, check, verbose, command, cancelled) -> {
             ac.grim.grimac.api.events.CommandExecuteEvent bukkitEvent =
