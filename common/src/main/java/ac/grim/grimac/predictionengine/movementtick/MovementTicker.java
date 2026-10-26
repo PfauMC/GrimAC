@@ -2,6 +2,7 @@ package ac.grim.grimac.predictionengine.movementtick;
 
 import ac.grim.grimac.player.GrimPlayer;
 import ac.grim.grimac.predictionengine.PlayerBaseTick;
+import ac.grim.grimac.predictionengine.PredictionTap;
 import ac.grim.grimac.predictionengine.blockeffects.PotentSulfurGeyser;
 import ac.grim.grimac.predictionengine.predictions.PredictionEngine;
 import ac.grim.grimac.predictionengine.predictions.PredictionEngineElytra;
@@ -291,6 +292,7 @@ public class MovementTicker {
             livingEntityTravel();
         }
 
+        PredictionTap.captureUncertainty(player);
         player.uncertaintyHandler.xNegativeUncertainty = 0;
         player.uncertaintyHandler.xPositiveUncertainty = 0;
         player.uncertaintyHandler.yNegativeUncertainty = 0;

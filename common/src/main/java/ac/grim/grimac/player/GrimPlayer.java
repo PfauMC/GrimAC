@@ -21,6 +21,7 @@ import ac.grim.grimac.platform.api.player.PlatformPlayer;
 import ac.grim.grimac.predictionengine.EntityFluidInteraction;
 import ac.grim.grimac.predictionengine.MovementCheckRunner;
 import ac.grim.grimac.predictionengine.PointThreeEstimator;
+import ac.grim.grimac.predictionengine.PredictionTap;
 import ac.grim.grimac.predictionengine.UncertaintyHandler;
 import ac.grim.grimac.manager.AttackCooldownHandler;
 import ac.grim.grimac.predictionengine.blockeffects.CompensatedGeysers;
@@ -109,6 +110,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GrimPlayer implements GrimUser {
     public final @NotNull User user;
     public final @NotNull UUID uuid;
+    // Reused by PredictionTap for every prediction of this player
+    public final double[] predictionTapValues = new double[PredictionTap.VALUES];
     public int entityID;
     public @MonotonicNonNull PlatformPlayer platformPlayer;
     // Start transaction handling stuff
