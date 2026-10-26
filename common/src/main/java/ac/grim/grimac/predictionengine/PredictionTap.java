@@ -5,6 +5,8 @@ import ac.grim.grimac.utils.anticheat.LogUtil;
 import ac.grim.grimac.utils.data.VectorData;
 import ac.grim.grimac.utils.math.Vector3dm;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -50,6 +52,16 @@ public final class PredictionTap {
     /** Null when nobody listens; a subscriber sets it back to null when it goes away. */
     public static volatile Listener listener;
 
+    private static final VarHandle LISTENER;
+
+    static {
+        try {
+            LISTENER = MethodHandles.lookup().findStaticVarHandle(PredictionTap.class, "listener", Listener.class);
+        } catch (ReflectiveOperationException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     private PredictionTap() {
     }
 
@@ -90,8 +102,8 @@ public final class PredictionTap {
             l.onPrediction(player.uuid, flags, picked.vectorType.name(), v);
         } catch (Throwable t) {
             // A listener left over from a reloaded plugin throws NoClassDefFoundError; PacketEvents would kick the player.
-            listener = null;
-            LogUtil.warn("Prediction listener removed after it threw", t);
+            // Only this listener goes: one installed meanwhile stays.
+            if (LISTENER.compareAndSet(l, null)) LogUtil.warn("Prediction listener removed after it threw", t);
         }
         // A tick without travel (dead, spectating, teleported) must not carry this tick's uncertainty.
         Arrays.fill(v, 0);
