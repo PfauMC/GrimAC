@@ -575,6 +575,7 @@ public class MovementCheckRunner extends GrimProcessor {
 
         // No, don't comment about the sqrt call.  It doesn't matter unless you run sqrt thousands of times a second.
         double offset = player.predictedVelocity.vector.distance(player.actualMovement);
+        PredictionTap.captureRawOffset(player, offset);
         offset = player.uncertaintyHandler.reduceOffset(offset);
 
         if (player.packetStateData.tryingToRiptide != clientClaimsRiptide) {
@@ -611,6 +612,7 @@ public class MovementCheckRunner extends GrimProcessor {
         if (player.skippedTickInActualMovement || !wasChecked)
             player.uncertaintyHandler.lastPointThree.reset();
 
+        PredictionTap.fire(player, offset, wasChecked);
         // We shouldn't attempt to send this prediction analysis into checks if we didn't predict anything
         player.checkManager.onPredictionFinish(new PredictionComplete(offset, update, wasChecked));
 
